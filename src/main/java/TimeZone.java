@@ -10,17 +10,15 @@ import java.time.format.DateTimeFormatter;
 import static java.net.URLEncoder.encode;
 
 public class TimeZone {
-    @Setter
     @Getter
+    @Setter
     private int timeZone;
-
     @Getter
     @Setter
     private String timeZoneCode;
-
-
+    @Getter
+    @Setter
     private String timeZoneParameter;
-
     public TimeZone(String timeZoneParameter) {
         this.timeZoneParameter = timeZoneParameter;
     }
@@ -33,25 +31,28 @@ public class TimeZone {
         Clock clock = Clock.offset
                 (Clock.system(ZoneId.of("UTC")),
                         Duration.ofHours(timeZone));
-        return dateTimeFormat.format(LocalDateTime.now(clock)) + "&nbsp" + timeZoneCode;
+        return dateTimeFormat.format(LocalDateTime.now(clock)) + " " + timeZoneCode;
     }
+
 
     void convertTimeZoneParameterToInt() {
         if (timeZoneParameter != null) {
-            String timeZone = encode(timeZoneParameter)
+            String timeZoneString = encode(timeZoneParameter)
                     .toLowerCase()
                     .replace("utc", "")
                     .replace("+", "");
-
-            try {
-                setTimeZone(Integer.parseInt(timeZone));
-                return;
-            } catch (IllegalArgumentException ex) {
-                setTimeZone(0);
-                return;
-            }
+            setTimeZone(parseInt(timeZoneString));
+            return;
         }
         setTimeZone(0);
+    }
+
+    private Integer parseInt(String timeZoneString) {
+        try {
+            return Integer.parseInt(timeZoneString);
+        } catch (IllegalArgumentException ex) {
+            return 0;
+        }
     }
 
     void setTimeZoneCode() {
