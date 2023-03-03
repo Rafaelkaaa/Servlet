@@ -16,15 +16,23 @@ public class TimezoneValidateFilter implements Filter {
         TimeZone timeZone = new TimeZone(httpRequest.getParameter("timezone"));
         timeZone.convertTimeZoneParameterToInt();
 
-        if (timeZone.getTimeZone() > 13 ||
-                timeZone.getTimeZone() < -12) {
-            httpResponse.sendError
-                    (HttpServletResponse.SC_BAD_REQUEST,
-                            "Invalid timezone range, try enter from -12 till +13");
-        } else {
+
+        if (timeZone.isTimeZoneValid()) {
+
             chain.doFilter(request, response);
+        } else {
+            try {
+                new CookieService(httpRequest.getCookies()).getCookie("lastTimeZone");
+                chain.doFilter(request, response);
+            } catch (NullPointerException ex) {
+                httpResponse.sendError
+                        (HttpServletResponse.SC_BAD_REQUEST,
+                                "Invalid timezone range, try enter from -12 till +13");
+            }
         }
     }
+
+
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

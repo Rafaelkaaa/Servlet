@@ -16,8 +16,6 @@ import java.util.Map;
 @WebServlet(value = "/time")
 public class TimeServlet extends HttpServlet {
     private TemplateEngine engine;
-    private TimeZone timeZone;
-
 
 
     @Override
@@ -32,6 +30,7 @@ public class TimeServlet extends HttpServlet {
         engine.addTemplateResolver(resolver);
 
     }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
@@ -39,14 +38,25 @@ public class TimeServlet extends HttpServlet {
         resp.setHeader("Refresh", "0.5");
 
 
-
-        resp.addCookie(new Cookie("lastTimeZone",
-                timeZone.getTimeZoneParameter()));
-
         Context context = new Context(req.getLocale(),
-                Map.of("time", timeZone.getTimeWithTimeZone()));
+                Map.of("time", getTimeWithTimeZone(req,resp)));
 
         engine.process("time", context, resp.getWriter());
 
+    }
+
+    private static String getTimeWithTimeZone(HttpServletRequest req, HttpServletResponse resp) {
+        TimeZone timeZone = new TimeZone(req.getParameter("timezone"));
+        timeZone.convertTimeZoneParameterToInt();
+
+        if (timeZone.isTimeZoneValid()){
+            resp.addCookie(new Cookie("lastTimeZone", Integer.toString(timeZone.getTimeZone())));
+        }else {
+            String lastTimeZone = new CookieService(req.getCookies())
+                    .getCookie("lastTimeZone")
+                    .getValue();
+            timeZone.setTimeZoneParameter("UTC" + (lastTimeZone));
+        }
+        return timeZone.getTimeWithTimeZone();
     }
 }

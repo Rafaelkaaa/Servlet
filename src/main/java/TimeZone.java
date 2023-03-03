@@ -14,7 +14,6 @@ public class TimeZone {
     @Setter
     private int timeZone;
     @Getter
-    @Setter
     private String timeZoneCode;
     @Getter
     @Setter
@@ -38,8 +37,8 @@ public class TimeZone {
     void convertTimeZoneParameterToInt() {
         if (timeZoneParameter != null) {
             String timeZoneString = encode(timeZoneParameter)
-                    .toLowerCase()
-                    .replace("utc", "")
+                    .toUpperCase()
+                    .replace("UTC", "")
                     .replace("+", "");
             setTimeZone(parseInt(timeZoneString));
             return;
@@ -61,5 +60,10 @@ public class TimeZone {
         }else {
             timeZoneCode = "UTC" + getTimeZone();
         }
+    }
+
+     boolean isTimeZoneValid() {
+        return getTimeZone() <= 13 &&
+                getTimeZone() >= -12;
     }
 }
